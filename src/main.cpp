@@ -2,6 +2,7 @@
 #include<time.h>
 #include<unistd.h>
 #include<stdio.h>
+#include<thread>
 //#include <ncurses.h>
 
 using namespace std;
@@ -12,11 +13,11 @@ const int width=70, height = 20;
 int score=0;
 int x,y;
 int fruitX, fruitY;
-enum eDir {STOP=0, LEFT, RIGHT, UP, DOWN};
+enum eDir {LEFT, RIGHT, UP, DOWN};
 eDir dir;
 void Setup(){
     gameOver = false;
-    dir = STOP;
+    dir = LEFT;
     x = width/2;
     y = height/2;
 
@@ -50,6 +51,7 @@ void printNelson(){
         
     }
 }
+
 void Draw(){
     system("clear");
     printNelson();
@@ -95,6 +97,7 @@ void Draw(){
     cout<<"SCORE:: "<<score<<endl;
 }
 void Input(){
+    while(!gameOver){
     char ch;
 
     system("stty -echo"); // supress echo
@@ -123,6 +126,7 @@ void Input(){
     }
     system ("stty echo"); // Make echo work
     system("stty -cbreak");// go to COOKED mode
+    }
 }
 void Logic(){
     int prevX=tailX[0];
@@ -164,14 +168,25 @@ if(x==0 || y == -1 || x == width || y == height){
         gameOver = true;
  }
 }
-int main(){
-    Setup();
+void Run(){\    
     while(!gameOver){
         Draw();
-        Input();
         Logic();
-        usleep(10000);
+        usleep(100000);
     }
+
+}
+int main(){
+   // void *run = &Run;
+    //void *input = &Input;
+
+    Setup();
+    thread t1(Input);
+    thread t2(Run);
+
+    cout<<dir;
+    t1.join();
+    t2.join();
     cout<<"GAMEOVER!!"<<endl;
     return 0;
 }
